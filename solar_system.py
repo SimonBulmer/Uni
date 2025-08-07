@@ -48,7 +48,7 @@ class Planet:
         self.known_moons = known_moons
 
     def get_moons(self):
-        return [moon for moon in Moon.moons if moon.planet == self.name]
+        return [moon for moon in Moon.moons if moon.planet.lower() == self.name.lower()]
     
     def calculate_mass(self):
         mass = self.mass * (10 ** self.mass_exponent) 
@@ -92,24 +92,30 @@ class Queries:
     def display_all_planet_info(self, planet=None):
         try:
             if planet:
-                print(f"=" * 90)
-                print(f"Planet Information: {planet.name}:")
-                print(f"=" * 90)
-                print(f"{'Name':<15} {'Mass (kg)':<30} {'Distance (km)':<30} {'Moons':>10}")
-                print(f"-" * 90)
-                mass_combined = f"{planet.mass} x 10^{planet.mass_exponent}"
-                print(f"{planet.name:<15} {mass_combined:<30} {planet.distance_from_sun:<30,} {planet.known_moons:>10}")
-                print(f"=" * 90)
+                print(f"=" * 150)
+                print(f"Planet Information (Detailed): {planet.name}")
+                print(f"=" * 150)
+                print(f"{'Name':<15} {'Mass (kg)':<30} {'Distance (km)':<20} {'Distance (miles)':<20} {'Distance (AU)':<20}{'No of Moons':<15} {'Common Moon Names':<40}")
+                print(f"-" * 150)
+                mass_combined = f"{planet.mass} x 10^{planet.mass_exponent} ({planet.calculate_mass():.3f} Earths)"
+                moons = [moon.name for moon in planet.get_moons()]
+                moon_list = ', '.join(moons) if moons else "No moons"
+                miles, au = planet.calculate_distance_from_sun()
+                print(f"{planet.name:<15} {mass_combined:<30} {planet.distance_from_sun:<20,} {miles:<20,.2f} {au:<20,.6f} {planet.known_moons:<15} {moon_list:<40}")
+                print(f"=" * 150)
             else:
-                print(f"=" * 90)
-                print(f"Planet Information:")
-                print(f"=" * 90)
-                print(f"{'Name':<15} {'Mass (kg)':<30} {'Distance (km)':<30} {'Moons':>10}")
-                print(f"-" * 90)
+                print(f"=" * 140)
+                print(f"Planet Information (Overview): ")
+                print(f"=" * 140)
+                print(f"{'Name':<15} {'Mass (kg)':<30} {'Distance (km)':<30} {'No of Moons':<15} {'Common Moon Names':<40}")
+                print(f"-" * 140)
                 for planet in self.planets:
                     mass_combined = f"{planet.mass} x 10^{planet.mass_exponent}"
-                    print(f"{planet.name:<15} {mass_combined:<30} {planet.distance_from_sun:<30,} {planet.known_moons:>10}")
-                print(f"=" * 90)
+                    moons = [moon.name for moon in planet.get_moons()]
+                    moon_list = ', '.join(moons) if moons else "No moons"
+                    print(f"{planet.name:<15} {mass_combined:<30} {planet.distance_from_sun:<30,} {planet.known_moons:<15} {moon_list:<40}")
+                print(f"=" * 140)
+                print(f"For a more detailed view of a specific planet use the query \"Tell me everything about [Planet Name]\"")
         except Exception as e:
             print(f"Error retrieving planet information: {e}")
 
@@ -145,7 +151,7 @@ class Queries:
                 if name in query:
                     planet = self.planet_dict[name]
 
-                    if any (word in query for word in["everything","info","details","notes"]):
+                    if any (word in query for word in["everything","info","details"]):
                         self.display_all_planet_info(planet)
                         return
                     elif "mass" in query:
@@ -189,7 +195,6 @@ def user_interface(planets):
         result = query.user_query(user_input)
         if result == "quit":
             break
-
 
 if __name__ == "__main__":
     try:
